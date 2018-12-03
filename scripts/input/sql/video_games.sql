@@ -1,5 +1,7 @@
+-- Data set: https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings (22 Dec 2016)
+
 --
--- 0.0 Delete tables after every build iteration.
+-- 1.0 Setup. Delete tables after every build iteration.
 --
 SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS developer, game, game_developer, genre, platform,
@@ -7,12 +9,12 @@ DROP TABLE IF EXISTS developer, game, game_developer, genre, platform,
 SET FOREIGN_KEY_CHECKS=1;
 
 --
--- 1.0 ENTITIES
+-- 2.0 ENTITIES
 -- Serve as lookup tables
 --
 
 --
--- 1.1 genre table
+-- 2.1 genre table
 --
 CREATE TABLE IF NOT EXISTS genre (
   genre_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -32,7 +34,7 @@ INTO TABLE genre
   (genre_name);
 
 --
--- 1.2 platform table
+-- 2.2 platform table
 --
 CREATE TABLE IF NOT EXISTS platform (
   platform_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -52,7 +54,7 @@ INTO TABLE platform
   (platform_name);
 
 --
--- 1.3 publisher table
+-- 2.3 publisher table
 --
 CREATE TABLE IF NOT EXISTS publisher (
   publisher_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -72,7 +74,7 @@ INTO TABLE publisher
   (publisher_name);
 
 --
--- 1.4 rating table
+-- 2.4 rating table
 --
 CREATE TABLE IF NOT EXISTS rating (
   rating_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -92,11 +94,11 @@ INTO TABLE rating
   (rating_name);
 
 --
--- 1.5 region table
+-- 2.5 region table
 --
 CREATE TABLE IF NOT EXISTS region (
   region_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  region_name CHAR(25) NOT NULL UNIQUE,
+  region_name VARCHAR(25) NOT NULL UNIQUE,
   PRIMARY KEY (region_id)
 )
 ENGINE=InnoDB
@@ -107,11 +109,11 @@ INSERT IGNORE INTO region (region_name) VALUES
   ('Global'), ('North America'), ('Europe'), ('Japan'), ('Other');
 
 --
--- 2.0 CORE ENTITIES AND M2M TABLES (developer, game, game_developer, sale)
+-- 3.0 CORE ENTITIES AND M2M TABLES (developer, game, game_developer, sale)
 --
 
 --
--- 2.1 Temporary game table
+-- 3.1 Temporary game table
 -- Note: 16719 rows data set.
 --
 CREATE TEMPORARY TABLE temp_game (
@@ -164,7 +166,7 @@ INTO TABLE temp_game
   rating_name = IF(rating_name = '', NULL, TRIM(rating_name));
 
 --
--- 2.2 game table
+-- 3.2 game table
 -- Note: 16717 rows data set (two records with blank game_name values excluded)
 -- Several columns will be dropped after junction tables are populated.
 --
@@ -226,7 +228,7 @@ SELECT tg.game_name, plat.platform_id, CAST(tg.year_released AS UNSIGNED) AS yea
        CAST(tg.critic_count AS UNSIGNED) AS critic_count,
        CAST(tg.user_score AS UNSIGNED) AS user_score,
        CAST(tg.user_count AS UNSIGNED) AS user_count,
-       tG.developer_name, r.rating_id
+       tg.developer_name, r.rating_id
  FROM temp_game tg
       LEFT JOIN genre g
              ON TRIM(tg.genre_name) = TRIM(g.genre_name)
@@ -240,19 +242,19 @@ WHERE tg.game_name IS NOT NULL AND tg.game_name != ''
 ORDER BY tg.global_sales DESC, tg.game_name, tg.year_released;
 
 --
--- 2.3 sale table (M2M)
+-- 3.3 sale table (M2M)
 -- Note: joins on temporary table via name matches resulted in duplicates.
--- Join on game instead and then drop sales columns with ALTER TABLE statement
+-- Join on game instead and then drop sales columns with an ALTER TABLE statement
 -- Without WHERE clauses: 83585 rows in sales (16717 games * 5)
 -- Excluding 0.00 sales entries:
 -- Total inserts: 56085 rows
 --
 CREATE TABLE IF NOT EXISTS sale (
-  sales_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  sale_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   game_id INTEGER NOT NULL,
   region_id INTEGER NOT NULL,
   total_sales DECIMAL(5,2),
-  PRIMARY KEY (sales_id),
+  PRIMARY KEY (sale_id),
   FOREIGN KEY (game_id) REFERENCES game(game_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (region_id) REFERENCES region(region_id)
@@ -289,7 +291,7 @@ SELECT g.game_id, 5 as region_id, g.other_sales AS total_sales
  WHERE g.other_sales > 0.00;
 
 --
--- 2.4 temporary numbers table
+-- 3.4 temporary numbers table
 -- Split comma-delimited developer values in order to populate a developer table
 -- and a M2M game_developer associative table
 -- Create temporary numbers table that will be used to split out comma-delimited lists of states.
@@ -307,7 +309,7 @@ INSERT IGNORE INTO numbers (num) VALUES
   (1), (2), (3), (4), (5), (6), (7), (8), (9), (10), (11), (12), (13), (14), (15);
 
 --
--- 2.4.1 temp_game_developer
+-- 3.4.1 temp_game_developer
 -- Temporary table that stores split out developer companies.
 --
 CREATE TEMPORARY TABLE temp_game_developer
@@ -321,7 +323,7 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
--- 2.4.2 This query splits the game developers and inserts them into the target temp table.
+-- 3.4.2 This query splits the game developers and inserts them into the target temp table.
 -- Note use of DISTINCT.
 -- USE TRIM to eliminate white space around developer_name value.
 --
@@ -336,7 +338,7 @@ SELECT DISTINCT g.game_id,
  ORDER BY g.game_id, developer_name;
 
 --
--- 2.5 developer table
+-- 3.5 developer table
 -- Populate with DISTINCT developer_name values from temp_game_developer table
 --
 CREATE TABLE IF NOT EXISTS developer (
@@ -354,7 +356,7 @@ SELECT DISTINCT TRIM(tgd.developer_name) AS developer_name
  ORDER BY developer_name;
 
 --
--- 2.6 game_developer table (M2M)
+-- 3.6 game_developer table (M2M)
 -- Insert records from temp_game_developer joined with developer
 --
 CREATE TABLE IF NOT EXISTS game_developer (
@@ -379,11 +381,11 @@ SELECT tgd.game_id, d.developer_id
  ORDER BY tgd.game_id, d.developer_id;
 
 --
--- 3.0 Clean up
+-- 4.0 Clean up
 --
 
 --
--- 3.1 Drop redundant columns from game table.
+-- 4.1 Drop redundant columns from game table.
 --
 ALTER TABLE game
       DROP COLUMN north_america_sales,
@@ -394,7 +396,7 @@ ALTER TABLE game
       DROP COLUMN developer_name;
 
 --
--- 3.2 DROP temporary tables
+-- 4.2 DROP temporary tables
 --
 DROP TEMPORARY TABLE numbers;
 DROP TEMPORARY TABLE temp_game;

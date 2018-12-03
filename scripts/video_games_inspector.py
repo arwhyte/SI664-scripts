@@ -27,8 +27,6 @@ def main(argv=None):
 	# Setting logging format and default level
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
-	# '\t'
-
 	# Read in source
 	source_path = os.path.join('input', 'csv', 'video_game_sales-20161222.csv')
 	source_data_frame = read_csv(source_path, ',')
