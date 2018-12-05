@@ -115,7 +115,7 @@ def read_csv(path, delimiter=','):
 	:param delimiter: field delimiter
 	:return: Pandas DataFrame
 	"""
-	return pd.read_csv(path, sep=delimiter, engine='python')
+	return pd.read_csv(path, sep=delimiter, encoding='utf-8', engine='python')
 
 
 def write_series_to_csv(series, path, delimiter=',', row_name=True):
