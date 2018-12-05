@@ -2,8 +2,9 @@
 -- 1.0 Setup. Delete tables after every build iteration.
 --
 SET FOREIGN_KEY_CHECKS=0;
-DROP TABLE IF EXISTS classification, country, department, artwork, artwork_type,
-                     temp_artwork, temp_classification;
+DROP TABLE IF EXISTS artwork, artwork_type, classification, city, country, department,
+                     region,
+                     temp_artwork, temp_city, temp_classification, temp_region;
 SET FOREIGN_KEY_CHECKS=1;
 
 --
@@ -34,10 +35,130 @@ INTO TABLE artwork_type
   (artwork_type_name);
 
 --
--- 2.2 classification table
+-- 2.2 country table
+-- Note: this data is not clean.
+--
+CREATE TABLE IF NOT EXISTS country (
+  country_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  country_name VARCHAR(50) NOT NULL UNIQUE,
+  PRIMARY KEY (country_id)
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+
+LOAD DATA LOCAL INFILE './output/met_artwork/met_countries.csv'
+INTO TABLE country
+  CHARACTER SET utf8mb4
+  FIELDS TERMINATED BY '\t'
+  ENCLOSED BY '"'
+  LINES TERMINATED BY '\n'
+  (country_name);
+
+--
+-- 2.3 temp city table
+-- Temp table includes lookup country_name.
+--
+CREATE TABLE IF NOT EXISTS temp_city (
+  temp_city_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  city_name VARCHAR(255) NOT NULL UNIQUE,
+  country_name VARCHAR(255) NULL,
+  PRIMARY KEY (temp_city_id)
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+
+LOAD DATA LOCAL INFILE './output/met_artwork/met_cities.csv'
+INTO TABLE temp_city
+  CHARACTER SET utf8mb4
+  FIELDS TERMINATED BY '\t'
+  ENCLOSED BY '"'
+  LINES TERMINATED BY '\n'
+  (city_name, country_name);
+
+--
+-- 2.4 city table
+--
+CREATE TABLE IF NOT EXISTS city (
+  city_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  city_name VARCHAR(255) NOT NULL UNIQUE,
+  country_id INTEGER NULL,
+  PRIMARY KEY (city_id),
+  FOREIGN KEY (country_id) REFERENCES country(country_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+-- CHARACTER SET latin1
+-- COLLATE latin1_swedish_ci;
+
+INSERT IGNORE INTO city (
+  city_name,
+  country_id
+)
+SELECT tc.city_name, c.country_id
+  FROM temp_city tc
+       LEFT JOIN country c
+              ON TRIM(tc.country_name) = TRIM(c.country_name)
+WHERE TRIM(tc.city_name) IS NOT NULL AND TRIM(tc.city_name) != ''
+ORDER BY tc.city_name;
+
+--
+-- 2.5 temp region table
+-- Temp table includes lookup country_name.
+--
+CREATE TABLE IF NOT EXISTS temp_region (
+  temp_region_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  region_name VARCHAR(255) NOT NULL UNIQUE,
+  country_name VARCHAR(255) NULL,
+  PRIMARY KEY (temp_region_id)
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+
+LOAD DATA LOCAL INFILE './output/met_artwork/met_regions.csv'
+INTO TABLE temp_region
+  CHARACTER SET utf8mb4
+  FIELDS TERMINATED BY '\t'
+  ENCLOSED BY '"'
+  LINES TERMINATED BY '\n'
+  (region_name, country_name);
+
+--
+-- 2.5 region table
+--
+CREATE TABLE IF NOT EXISTS region (
+  region_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  region_name VARCHAR(255) NOT NULL UNIQUE,
+  country_id INTEGER NULL,
+  PRIMARY KEY (region_id),
+  FOREIGN KEY (country_id) REFERENCES country(country_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+-- CHARACTER SET latin1
+-- COLLATE latin1_swedish_ci;
+
+INSERT IGNORE INTO region (
+  region_name,
+  country_id
+)
+SELECT tr.region_name, c.country_id
+  FROM temp_region tr
+       LEFT JOIN country c
+              ON TRIM(tr.country_name) = TRIM(c.country_name)
+WHERE TRIM(tr.region_name) IS NOT NULL AND TRIM(tr.region_name) != ''
+ORDER BY tr.region_name;
+
+--
+-- 2.6 temp classification table
 -- Temp table required because source data is messy.
 --
-
 CREATE TABLE IF NOT EXISTS temp_classification (
   temp_classification_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   classification_name VARCHAR(255) NOT NULL UNIQUE,
@@ -57,6 +178,9 @@ INTO TABLE temp_classification
   LINES TERMINATED BY '\n'
   (classification_name);
 
+--
+-- 2.7 classification table
+--
 CREATE TABLE IF NOT EXISTS classification (
   classification_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   classification_name VARCHAR(255) NOT NULL UNIQUE,
@@ -78,30 +202,7 @@ WHERE TRIM(tc.classification_name) NOT like ',%'
 ORDER BY tc.temp_classification_id;
 
 --
--- 2.3 country table
--- Note: this data is not clean.
---
-CREATE TABLE IF NOT EXISTS country (
-  country_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  country_name VARCHAR(50) NOT NULL UNIQUE,
-  PRIMARY KEY (country_id)
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
--- CHARACTER SET latin1
--- COLLATE latin1_swedish_ci;
-
-LOAD DATA LOCAL INFILE './output/met_artwork/met_countries.csv'
-INTO TABLE country
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY '\t'
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  (country_name);
-
---
--- 2.4 department table
+-- 2.8 department table
 --
 CREATE TABLE IF NOT EXISTS department (
   department_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -144,10 +245,12 @@ CREATE TABLE IF NOT EXISTS temp_artwork (
   year_begin_end VARCHAR(255) NULL,
   year_begin VARCHAR(10) NULL,
   year_end VARCHAR(10) NULL,
-  dimensions VARCHAR(500) NULL,
+  medium VARCHAR(500) NULL,
+  dimensions VARCHAR(750) NULL,
   donor VARCHAR(1000) NULL,
   year_acquired VARCHAR(10) NULL,
-  country_name VARCHAR(100) NULL,
+  city_name VARCHAR(255) NULL,
+  country_name VARCHAR(255) NULL,
   classification_name VARCHAR(100) NULL,
   resource_link VARCHAR(255) NULL,
   PRIMARY KEY (temp_artwork_id)
@@ -168,8 +271,8 @@ INTO TABLE temp_artwork
   IGNORE 1 LINES
   (accession_number, is_public_domain, department_name, artwork_type_name, title,
     @dummy, @dummy, @dummy, @dummy, @dummy, @dummy,
-    @dummy, @dummy, year_begin_end, year_begin, year_end, @dummy,
-    dimensions, donor, year_acquired, @dummy, country_name, @dummy,
+    @dummy, @dummy, year_begin_end, year_begin, year_end, medium,
+    dimensions, donor, year_acquired, city_name, country_name, @dummy,
     classification_name, @dummy, resource_link, @dummy
   )
 
@@ -191,13 +294,17 @@ INTO TABLE temp_artwork
                 OR TRIM(year_end) = ''
                 OR LENGTH(CONCAT('', TRIM(year_end) * 1)) = 0,
                 NULL, TRIM(year_end)),
-  classification_name = IF(LENGTH(TRIM(classification_name)) > 0, TRIM(classification_name), NULL),
-  resource_link = IF(LENGTH(TRIM(resource_link)) > 0, TRIM(resource_link), NULL),
+  medium = IF(LENGTH(TRIM(medium)) > 0, TRIM(medium), NULL),
+  dimensions = IF(LENGTH(TRIM(dimensions)) > 0, TRIM(dimensions), NULL),
   donor = IF(LENGTH(TRIM(donor)) > 0, TRIM(donor), NULL),
   year_acquired = IF(year_acquired IS NULL
                      OR TRIM(year_acquired) = ''
                      OR LENGTH(CONCAT('', TRIM(year_acquired) * 1)) = 0,
-                     NULL, TRIM(year_acquired));
+                     NULL, TRIM(year_acquired)),
+   city_name = IF(LENGTH(TRIM(city_name)) > 0, TRIM(city_name), NULL),
+   country_name = IF(LENGTH(TRIM(country_name)) > 0, TRIM(country_name), NULL),
+   classification_name = IF(LENGTH(TRIM(classification_name)) > 0, TRIM(classification_name), NULL),
+   resource_link = IF(LENGTH(TRIM(resource_link)) > 0, TRIM(resource_link), NULL);
 
 --
 -- 3.2 artwork table
@@ -216,17 +323,21 @@ CREATE TABLE IF NOT EXISTS artwork (
   year_begin_end VARCHAR(255) NULL,
   year_begin INTEGER NULL,
   year_end INTEGER NULL,
-  dimensions VARCHAR(500) NULL,
+  medium VARCHAR(500) NULL,
+  dimensions VARCHAR(750) NULL,
   donor VARCHAR(1000) NULL,
   year_acquired INTEGER NULL,
+  city_id INTEGER NULL,
   country_id INTEGER NULL,
   resource_link VARCHAR(255) NULL,
   PRIMARY KEY (artwork_id),
+  FOREIGN KEY (classification_id) REFERENCES classification(classification_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (artwork_type_id) REFERENCES artwork_type(artwork_type_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (department_id) REFERENCES department(department_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (classification_id) REFERENCES classification(classification_id)
+  FOREIGN KEY (city_id) REFERENCES city(city_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (country_id) REFERENCES country(country_id)
     ON DELETE CASCADE ON UPDATE CASCADE
@@ -248,33 +359,39 @@ INSERT IGNORE INTO artwork
   year_begin_end,
   year_begin,
   year_end,
+  medium,
   dimensions,
   donor,
   year_acquired,
+  city_id,
   country_id,
   resource_link
 )
 SELECT ta.accession_number,
        ta.is_public_domain,
-       d.department_id,
+       dpt.department_id,
        cls.classification_id,
-       arttype.artwork_type_id,
+       awt.artwork_type_id,
        ta.title,
        ta.year_begin_end,
        CAST(ta.year_begin AS SIGNED) AS year_begin,
        CAST(ta.year_end AS SIGNED) AS year_end,
+       ta.medium,
        ta.dimensions,
        ta.donor,
        CAST(ta.year_acquired AS UNSIGNED) AS year_acquired,
+       cit.city_id,
        cou.country_id,
        ta.resource_link
   FROM temp_artwork ta
-       LEFT JOIN artwork_type arttype
-              ON TRIM(ta.artwork_type_name) = TRIM(arttype.artwork_type_name)
-       LEFT JOIN department d
-              ON TRIM(ta.department_name) = TRIM(d.department_name)
+       LEFT JOIN artwork_type awt
+              ON TRIM(ta.artwork_type_name) = TRIM(awt.artwork_type_name)
+       LEFT JOIN department dpt
+              ON TRIM(ta.department_name) = TRIM(dpt.department_name)
        LEFT JOIN classification cls
               ON TRIM(ta.classification_name) = TRIM(cls.classification_name)
+       LEFT JOIN city cit
+              ON TRIM(ta.city_name) = TRIM(cit.city_name)
        LEFT JOIN country cou
               ON TRIM(ta.country_name) = TRIM(cou.country_name)
  ORDER BY ta.temp_artwork_id;

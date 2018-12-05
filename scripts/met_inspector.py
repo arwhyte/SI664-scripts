@@ -43,50 +43,65 @@ def main(argv=None):
 	encoding = find_encoding(source_path)
 	logging.info(msg[0].format(encoding))
 
-	# Read in source with correct encoding
+	# Read in source with correct encoding and remove whitespace.
 	source_data_frame = read_csv(source_path, encoding, '\t')
 	source_data_frame_trimmed = trim_columns(source_data_frame)
-	source_trimmed_csv = os.path.join('output', 'met_artwork', 'met_artwork-trimmed.csv')
-	write_series_to_csv(source_data_frame_trimmed, source_trimmed_csv, '\t', False)
-	logging.info(msg[1].format(os.path.abspath(source_trimmed_csv)))
+
+	# Turned off as trimmed source file now includes manual fixes
+	# source_trimmed_csv = os.path.join('output', 'met_artwork', 'met_artwork-trimmed.csv')
+	# write_series_to_csv(source_data_frame_trimmed, source_trimmed_csv, '\t', False)
+	# logging.info(msg[1].format(os.path.abspath(source_trimmed_csv)))
 
 	# Write artwork types to a .csv file.
-	artwork_types = extract_filtered_series(source_data_frame_trimmed, 'Object Name')
+	artwork_types = extract_filtered_series(source_data_frame_trimmed, ['Object Name'])
 	artwork_types_csv = os.path.join('output', 'met_artwork', 'met_artwork_types.csv')
 	write_series_to_csv(artwork_types, artwork_types_csv, '\t', False)
 	logging.info(msg[2].format(os.path.abspath(artwork_types_csv)))
 
+	# Write cities and countries (the latter will be replaced with a FK) to a .csv file.
+	cities = extract_filtered_series(source_data_frame_trimmed, ['City','Country'])
+	cities_csv = os.path.join('output', 'met_artwork', 'met_cities.csv')
+	write_series_to_csv(cities, cities_csv, '\t', False)
+	logging.info(msg[8].format(os.path.abspath(cities_csv)))
+
+	# Write regions and countries (the latter will be replaced with a FK) to a .csv file.
+	regions = extract_filtered_series(source_data_frame_trimmed, ['Region','Country'])
+	regions_csv = os.path.join('output', 'met_artwork', 'met_regions.csv')
+	write_series_to_csv(regions, regions_csv, '\t', False)
+	logging.info(msg[14].format(os.path.abspath(regions_csv)))
+
 	# Write classification to a .csv file.
-	classifications = extract_filtered_series(source_data_frame_trimmed, 'Classification')
+	classifications = extract_filtered_series(source_data_frame_trimmed, ['Classification'])
 	classifications_csv = os.path.join('output', 'met_artwork', 'met_classifications.csv')
 	write_series_to_csv(classifications, classifications_csv, '\t', False)
 	logging.info(msg[9].format(os.path.abspath(classifications_csv)))
 
 	# Write countries to a .csv file.
-	countries = extract_filtered_series(source_data_frame_trimmed, 'Country')
+	countries = extract_filtered_series(source_data_frame_trimmed, ['Country'])
 	countries_csv = os.path.join('output', 'met_artwork', 'met_countries.csv')
 	write_series_to_csv(countries, countries_csv, '\t', False)
 	logging.info(msg[10].format(os.path.abspath(countries_csv)))
 
 	# Write departments to a .csv file
-	departments = extract_filtered_series(source_data_frame_trimmed, 'Department')
+	departments = extract_filtered_series(source_data_frame_trimmed, ['Department'])
 	departments_csv = os.path.join('output', 'met_artwork', 'met_departments.csv')
 	write_series_to_csv(departments, departments_csv, '\t', False)
 	logging.info(msg[11].format(os.path.abspath(departments_csv)))
 
 
-def extract_filtered_series(data_frame, column_name):
+def extract_filtered_series(data_frame, column_list):
 	"""
 	Returns a filtered Panda Series one-dimensional ndarray from a targeted column.
 	Duplicate values and NaN or blank values are dropped from the result set which is
 	returned sorted (ascending).
 	:param data_frame: Pandas DataFrame
-	:param column_name: column name string
+	:param column_list: list of columns
 	:return: Panda Series one-dimensional ndarray
 	"""
 
-	return data_frame[column_name].str.strip().drop_duplicates().dropna().sort_values()
-	# return data_frame[column_name].drop_duplicates().dropna().sort_values()
+	return data_frame[column_list].drop_duplicates().dropna(axis=0, how='all').sort_values(
+		column_list)
+	# return data_frame[column_list].str.strip().drop_duplicates().dropna().sort_values()
 
 
 def find_encoding(fname):
