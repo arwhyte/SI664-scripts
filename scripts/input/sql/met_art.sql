@@ -100,10 +100,10 @@ INSERT IGNORE INTO city (
   city_name,
   country_id
 )
-SELECT ...
-  FROM ...
-
-
+SELECT tc.city_name, c.country_id
+  FROM temp_city tc
+       LEFT JOIN country c
+              ON TRIM(tc.country_name) = TRIM(c.country_name)
 WHERE TRIM(tc.city_name) IS NOT NULL AND TRIM(tc.city_name) != ''
 ORDER BY tc.city_name;
 
@@ -151,10 +151,10 @@ INSERT IGNORE INTO region (
   region_name,
   country_id
 )
-SELECT ...
-  FROM ...
-
-
+SELECT tr.region_name, c.country_id
+  FROM temp_region tr
+       LEFT JOIN country c
+              ON TRIM(tr.country_name) = TRIM(c.country_name)
 WHERE TRIM(tr.region_name) IS NOT NULL AND TRIM(tr.region_name) != ''
 ORDER BY tr.region_name;
 
@@ -442,35 +442,38 @@ INSERT IGNORE INTO artwork
   rights_and_reproduction,
   repository_id
 )
-SELECT ...
-
-
-
-
-
-
+SELECT ta.accession_number,
+       ta.is_public_domain,
+       dpt.department_id,
+       cls.classification_id,
+       awt.artwork_type_id,
+       ta.title,
+       ta.year_begin_end,
        CAST(ta.year_begin AS SIGNED) AS year_begin,
        CAST(ta.year_end AS SIGNED) AS year_end,
-
-
-
-
-       
-
+       ta.medium,
+       ta.dimensions,
+       ta.acquired_from,
+       -- CAST(ta.year_acquired AS UNSIGNED) AS year_acquired,
+       cit.city_id,
+       cou.country_id,
+       reg.region_id,
+       ta.resource_link,
+       ta.rights_and_reproduction,
+       repo.repository_id
   FROM temp_artwork ta
-       ...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+       LEFT JOIN artwork_type awt
+              ON TRIM(ta.artwork_type_name) = TRIM(awt.artwork_type_name)
+       LEFT JOIN department dpt
+              ON TRIM(ta.department_name) = TRIM(dpt.department_name)
+       LEFT JOIN classification cls
+              ON TRIM(ta.classification_name) = TRIM(cls.classification_name)
+       LEFT JOIN city cit
+              ON TRIM(ta.city_name) = TRIM(cit.city_name)
+       LEFT JOIN country cou
+              ON TRIM(ta.country_name) = TRIM(cou.country_name)
+       LEFT JOIN region reg
+              ON TRIM(ta.region_name) = TRIM(reg.region_name)
+       LEFT JOIN repository repo
+              ON TRIM(ta.repository_name) = TRIM(repo.repository_name)
  ORDER BY ta.temp_artwork_id;
