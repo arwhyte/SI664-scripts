@@ -1,6 +1,5 @@
 City	Country
 Aachen	Germany
-Ahmedabad	India
 Alexandria	Egypt
 Amiens	France
 Amsterdam	Netherlands
@@ -24,6 +23,7 @@ Biloxi	United States
 Boston	United States
 Boston	
 Boston: Isaiah Thomas and Ebenezer T. Andrews	
+Boston|Charlestown	United States|United States
 Bougouni or Dioila region	Mali
 Bristol	United States
 Brooklyn	United States
@@ -44,7 +44,7 @@ Court of Benin	Nigeria
 Cremona	Italy
 Damascus	Syria
 Dresden	Germany
-Dresden	
+Dresden|Toledo	
 Ebreichsdorf	Lower Austria
 Efon-Alaiye region	Nigeria
 Firenze|Pisa	Italy|Italy
@@ -105,8 +105,10 @@ New Bremen	United States
 New Haven	United States
 New York	United States
 New York	
+New York|Ahmedabad	United States|India
 Newport	United States
 Nishapur	Iran
+Nishapur|Nishapur	Iran|Iran
 Nissan or Bougainville Island	Papua New Guinea
 Nsukka	Nigeria
 Nuremberg	Germany (?)

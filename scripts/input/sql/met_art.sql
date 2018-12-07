@@ -3,8 +3,7 @@
 --
 SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS artwork, artwork_type, classification, city, country, department,
-                     region,
-                     temp_artwork, temp_city, temp_classification, temp_region;
+                     region, repository, temp_artwork, temp_city, temp_classification, temp_region;
 SET FOREIGN_KEY_CHECKS=1;
 
 --
@@ -32,6 +31,7 @@ INTO TABLE artwork_type
   FIELDS TERMINATED BY '\t'
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
   (artwork_type_name);
 
 --
@@ -53,6 +53,7 @@ INTO TABLE country
   FIELDS TERMINATED BY '\t'
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
   (country_name);
 
 --
@@ -75,6 +76,7 @@ INTO TABLE temp_city
   FIELDS TERMINATED BY '\t'
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
   (city_name, country_name);
 
 --
@@ -125,6 +127,7 @@ INTO TABLE temp_region
   FIELDS TERMINATED BY '\t'
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
   (region_name, country_name);
 
 --
@@ -176,6 +179,7 @@ INTO TABLE temp_classification
   FIELDS TERMINATED BY '\t'
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
   (classification_name);
 
 --
@@ -221,7 +225,31 @@ INTO TABLE department
   FIELDS TERMINATED BY '\t'
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
   (department_name);
+
+--
+-- 2.8 repository table
+--
+CREATE TABLE IF NOT EXISTS repository (
+  repository_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  repository_name VARCHAR(100) NOT NULL UNIQUE,
+  PRIMARY KEY (repository_id)
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+-- CHARACTER SET latin1
+-- COLLATE latin1_swedish_ci;
+
+LOAD DATA LOCAL INFILE './output/met_artwork/met_repositories.csv'
+INTO TABLE repository
+  CHARACTER SET utf8mb4
+  FIELDS TERMINATED BY '\t'
+  ENCLOSED BY '"'
+  LINES TERMINATED BY '\n'
+  IGNORE 1 LINES
+  (repository_name);
 
 --
 -- 3.0 CORE ENTITIES AND M2M TABLES (developer, game, game_developer, sale)
@@ -235,6 +263,37 @@ INTO TABLE department
 -- Character set = Windows-1252 = cp1252 = latin1
 -- Collation = latin1_swedish_ci (default)
 
+-- Object Number
+-- Is Public Domain
+-- Department
+-- Object Name
+-- Title
+-- Culture
+-- Artist Role
+-- Artist Prefix
+-- Artist Display Name
+-- Artist Suffix
+-- Artist Alpha Sort
+-- Artist Nationality
+-- Artist Begin Date
+-- Artist End Date
+-- Object Date
+-- Object Begin Date
+-- Object End Date
+-- Medium
+-- Dimensions
+-- Credit Line (acquired_from)
+-- Acquisition Date
+-- City
+-- State
+-- County
+-- Country
+-- Region
+-- Classification
+-- Rights and Reproduction
+-- Link Resource
+-- Repository
+
 CREATE TABLE IF NOT EXISTS temp_artwork (
   temp_artwork_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   accession_number VARCHAR(50) NULL,
@@ -242,17 +301,23 @@ CREATE TABLE IF NOT EXISTS temp_artwork (
   department_name VARCHAR(75) NULL,
   artwork_type_name VARCHAR(255) NULL,
   title VARCHAR(500) NULL,
+  culture VARCHAR(255) NULL,
   year_begin_end VARCHAR(255) NULL,
   year_begin VARCHAR(10) NULL,
   year_end VARCHAR(10) NULL,
   medium VARCHAR(500) NULL,
   dimensions VARCHAR(750) NULL,
-  donor VARCHAR(1000) NULL,
-  year_acquired VARCHAR(10) NULL,
+  acquired_from VARCHAR(1000) NULL,
+  -- year_acquired VARCHAR(10) NULL,
   city_name VARCHAR(255) NULL,
+  state_name VARCHAR(255) NULL,
+  county_name VARCHAR(255) NULL,
   country_name VARCHAR(255) NULL,
+  region_name VARCHAR(255) NULL,
   classification_name VARCHAR(100) NULL,
+  rights_and_reproduction VARCHAR(255) NULL,
   resource_link VARCHAR(255) NULL,
+  repository_name VARCHAR(100) NULL,
   PRIMARY KEY (temp_artwork_id)
 )
 ENGINE=InnoDB
@@ -261,7 +326,7 @@ COLLATE utf8mb4_0900_ai_ci;
 -- CHARACTER SET latin1
 -- COLLATE latin1_swedish_ci;
 
-LOAD DATA LOCAL INFILE './output/met_artwork/met_artwork-trimmed_manual_fixes.csv'
+LOAD DATA LOCAL INFILE './output/met_artwork/met_artwork-trimmed.csv'
 INTO TABLE temp_artwork
   CHARACTER SET utf8mb4
   FIELDS TERMINATED BY '\t'
@@ -269,11 +334,11 @@ INTO TABLE temp_artwork
   ENCLOSED BY '"'
   LINES TERMINATED BY '\n'
   IGNORE 1 LINES
-  (accession_number, is_public_domain, department_name, artwork_type_name, title,
-    @dummy, @dummy, @dummy, @dummy, @dummy, @dummy,
-    @dummy, @dummy, year_begin_end, year_begin, year_end, medium,
-    dimensions, donor, year_acquired, city_name, country_name, @dummy,
-    classification_name, @dummy, resource_link, @dummy
+  (accession_number, is_public_domain, department_name, artwork_type_name, title, culture,
+    @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy,
+    year_begin_end, year_begin, year_end, medium, dimensions, acquired_from, @dummy,
+    city_name, state_name, county_name, country_name, region_name, classification_name,
+    rights_and_reproduction, resource_link, repository_name
   )
 
   --
@@ -285,26 +350,26 @@ INTO TABLE temp_artwork
   department_name = IF(LENGTH(TRIM(department_name)) > 0, TRIM(department_name), NULL),
   artwork_type_name = IF(LENGTH(TRIM(artwork_type_name)) > 0, TRIM(artwork_type_name), NULL),
   title = IF(LENGTH(TRIM(title)) > 0, TRIM(title), NULL),
+  culture = IF(LENGTH(TRIM(culture)) > 0, TRIM(culture), NULL),
   year_begin_end = IF(LENGTH(TRIM(year_begin_end)) > 0, TRIM(year_begin_end), NULL),
-  year_begin = IF(year_begin IS NULL
-                  OR TRIM(year_begin) = ''
-                  OR LENGTH(CONCAT('', TRIM(year_begin)) * 1) = 0,
-                  NULL, TRIM(year_begin)),
-  year_end = IF(year_end IS NULL
-                OR TRIM(year_end) = ''
-                OR LENGTH(CONCAT('', TRIM(year_end) * 1)) = 0,
-                NULL, TRIM(year_end)),
+  year_begin = IF(year_begin IS NULL OR TRIM(year_begin) = ''
+        OR LENGTH(CONCAT('', TRIM(year_begin)) * 1) = 0, NULL, TRIM(year_begin)),
+  year_end = IF(year_end IS NULL OR TRIM(year_end) = ''
+        OR LENGTH(CONCAT('', TRIM(year_end) * 1)) = 0, NULL, TRIM(year_end)),
   medium = IF(LENGTH(TRIM(medium)) > 0, TRIM(medium), NULL),
   dimensions = IF(LENGTH(TRIM(dimensions)) > 0, TRIM(dimensions), NULL),
-  donor = IF(LENGTH(TRIM(donor)) > 0, TRIM(donor), NULL),
-  year_acquired = IF(year_acquired IS NULL
-                     OR TRIM(year_acquired) = ''
-                     OR LENGTH(CONCAT('', TRIM(year_acquired) * 1)) = 0,
-                     NULL, TRIM(year_acquired)),
-   city_name = IF(LENGTH(TRIM(city_name)) > 0, TRIM(city_name), NULL),
-   country_name = IF(LENGTH(TRIM(country_name)) > 0, TRIM(country_name), NULL),
-   classification_name = IF(LENGTH(TRIM(classification_name)) > 0, TRIM(classification_name), NULL),
-   resource_link = IF(LENGTH(TRIM(resource_link)) > 0, TRIM(resource_link), NULL);
+  acquired_from = IF(LENGTH(TRIM(acquired_from)) > 0, TRIM(acquired_from), NULL),
+  -- year_acquired = IF(year_acquired IS NULL OR TRIM(year_acquired) = ''
+  -- OR LENGTH(CONCAT('', TRIM(year_acquired) * 1)) = 0, NULL, TRIM(year_acquired)),
+  city_name = IF(LENGTH(TRIM(city_name)) > 0, TRIM(city_name), NULL),
+  state_name = IF(LENGTH(TRIM(state_name)) > 0, TRIM(state_name), NULL),
+  county_name = IF(LENGTH(TRIM(county_name)) > 0, TRIM(county_name), NULL),
+  country_name = IF(LENGTH(TRIM(country_name)) > 0, TRIM(country_name), NULL),
+  region_name = IF(LENGTH(TRIM(region_name)) > 0, TRIM(region_name), NULL),
+  classification_name = IF(LENGTH(TRIM(classification_name)) > 0, TRIM(classification_name), NULL),
+  resource_link = IF(LENGTH(TRIM(resource_link)) > 0, TRIM(resource_link), NULL),
+  rights_and_reproduction = IF(LENGTH(TRIM(rights_and_reproduction)) > 0, TRIM(rights_and_reproduction), NULL),
+  repository_name = IF(LENGTH(TRIM(repository_name)) > 0, TRIM(repository_name), NULL);
 
 --
 -- 3.2 artwork table
@@ -325,11 +390,14 @@ CREATE TABLE IF NOT EXISTS artwork (
   year_end INTEGER NULL,
   medium VARCHAR(500) NULL,
   dimensions VARCHAR(750) NULL,
-  donor VARCHAR(1000) NULL,
-  year_acquired INTEGER NULL,
+  acquired_from VARCHAR(1000) NULL,
+  -- year_acquired INTEGER NULL,
   city_id INTEGER NULL,
   country_id INTEGER NULL,
+  region_id INTEGER NULL,
   resource_link VARCHAR(255) NULL,
+  rights_and_reproduction VARCHAR(255) NULL,
+  repository_id INTEGER NULL,
   PRIMARY KEY (artwork_id),
   FOREIGN KEY (classification_id) REFERENCES classification(classification_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
@@ -340,6 +408,10 @@ CREATE TABLE IF NOT EXISTS artwork (
   FOREIGN KEY (city_id) REFERENCES city(city_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (country_id) REFERENCES country(country_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (region_id) REFERENCES region(region_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (repository_id) REFERENCES repository(repository_id)
     ON DELETE CASCADE ON UPDATE CASCADE
 )
 ENGINE=InnoDB
@@ -361,11 +433,14 @@ INSERT IGNORE INTO artwork
   year_end,
   medium,
   dimensions,
-  donor,
-  year_acquired,
+  acquired_from,
+  -- year_acquired,
   city_id,
   country_id,
-  resource_link
+  region_id,
+  resource_link,
+  rights_and_reproduction,
+  repository_id
 )
 SELECT ta.accession_number,
        ta.is_public_domain,
@@ -378,11 +453,14 @@ SELECT ta.accession_number,
        CAST(ta.year_end AS SIGNED) AS year_end,
        ta.medium,
        ta.dimensions,
-       ta.donor,
-       CAST(ta.year_acquired AS UNSIGNED) AS year_acquired,
+       ta.acquired_from,
+       -- CAST(ta.year_acquired AS UNSIGNED) AS year_acquired,
        cit.city_id,
        cou.country_id,
-       ta.resource_link
+       reg.region_id,
+       ta.resource_link,
+       ta.rights_and_reproduction,
+       repo.repository_id
   FROM temp_artwork ta
        LEFT JOIN artwork_type awt
               ON TRIM(ta.artwork_type_name) = TRIM(awt.artwork_type_name)
@@ -394,4 +472,8 @@ SELECT ta.accession_number,
               ON TRIM(ta.city_name) = TRIM(cit.city_name)
        LEFT JOIN country cou
               ON TRIM(ta.country_name) = TRIM(cou.country_name)
+       LEFT JOIN region reg
+              ON TRIM(ta.region_name) = TRIM(reg.region_name)
+       LEFT JOIN repository repo
+              ON TRIM(ta.repository_name) = TRIM(repo.repository_name)
  ORDER BY ta.temp_artwork_id;

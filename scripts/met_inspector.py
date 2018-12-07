@@ -39,18 +39,20 @@ def main(argv=None):
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 	# Check source file encoding
-	source_path = os.path.join('input', 'csv', 'met_data_seroka-orig.csv')
-	encoding = find_encoding(source_path)
-	logging.info(msg[0].format(encoding))
+	source_path = os.path.join('input', 'csv', 'met_cleaned_seroka-orig.xlsx')
+	# source_path = os.path.join('input', 'csv', 'met_data_seroka-orig.csv')
+	# encoding = find_encoding(source_path)
+	# logging.info(msg[0].format(encoding))
 
 	# Read in source with correct encoding and remove whitespace.
-	source_data_frame = read_csv(source_path, encoding, '\t')
+	source_data_frame = pd.read_excel(source_path, sheet_name='all_data', header=0)
+	# source_data_frame = read_csv(source_path, encoding, '\t')
 	source_data_frame_trimmed = trim_columns(source_data_frame)
 
 	# Turned off as trimmed source file now includes manual fixes
-	# source_trimmed_csv = os.path.join('output', 'met_artwork', 'met_artwork-trimmed.csv')
-	# write_series_to_csv(source_data_frame_trimmed, source_trimmed_csv, '\t', False)
-	# logging.info(msg[1].format(os.path.abspath(source_trimmed_csv)))
+	source_trimmed_csv = os.path.join('output', 'met_artwork', 'met_artwork-trimmed.csv')
+	write_series_to_csv(source_data_frame_trimmed, source_trimmed_csv, '\t', False)
+	logging.info(msg[1].format(os.path.abspath(source_trimmed_csv)))
 
 	# Write artwork types to a .csv file.
 	artwork_types = extract_filtered_series(source_data_frame_trimmed, ['Object Name'])
@@ -87,6 +89,12 @@ def main(argv=None):
 	departments_csv = os.path.join('output', 'met_artwork', 'met_departments.csv')
 	write_series_to_csv(departments, departments_csv, '\t', False)
 	logging.info(msg[11].format(os.path.abspath(departments_csv)))
+
+	# Write repositories to a .csv file
+	repositories = extract_filtered_series(source_data_frame_trimmed, ['Repository'])
+	repositories_csv = os.path.join('output', 'met_artwork', 'met_repositories.csv')
+	write_series_to_csv(repositories, repositories_csv, '\t', False)
+	logging.info(msg[15].format(os.path.abspath(repositories_csv)))
 
 
 def extract_filtered_series(data_frame, column_list):

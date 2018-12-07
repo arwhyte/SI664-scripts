@@ -38,31 +38,31 @@ def main(argv=None):
 
 	# Write regions to a .csv file.
 	unsd_region = extract_filtered_series(unsd_data_frame, 'region_name')
-	unsd_region_csv = './output/unsd_region.csv'
+	unsd_region_csv = './output/unesco/unsd_region.csv'
 	write_series_to_csv(unsd_region, unsd_region_csv, '\t', False)
 	logging.info(msg[1].format(os.path.abspath(unsd_region_csv)))
 
 	# Write sub-regions to a .csv file.
 	unsd_sub_region = extract_filtered_series(unsd_data_frame, 'sub_region_name')
-	unsd_sub_region_csv = './output/unsd_sub_region.csv'
+	unsd_sub_region_csv = './output/unesco/unsd_sub_region.csv'
 	write_series_to_csv(unsd_sub_region, unsd_sub_region_csv, '\t', False)
 	logging.info(msg[2].format(os.path.abspath(unsd_sub_region_csv)))
 
 	# Write intermediate_regions to a .csv file.
 	unsd_intermed_region = extract_filtered_series(unsd_data_frame, 'intermediate_region_name')
-	unsd_intermed_region_csv = './output/unsd_intermed_region.csv'
+	unsd_intermed_region_csv = './output/unesco/unsd_intermed_region.csv'
 	write_series_to_csv(unsd_intermed_region, unsd_intermed_region_csv, '\t', False)
 	logging.info(msg[3].format(os.path.abspath(unsd_intermed_region_csv)))
 
 	# Write countries or areas to a .csv file.
 	unsd_country_area = extract_filtered_series(unsd_data_frame, 'country_area_name')
-	unsd_country_area_csv = './output/unsd_country_area.csv'
+	unsd_country_area_csv = './output/unesco/unsd_country_area.csv'
 	write_series_to_csv(unsd_country_area, unsd_country_area_csv, '\t', False)
 	logging.info(msg[4].format(os.path.abspath(unsd_country_area_csv)))
 
 	# Write development status to a .csv file.
 	unsd_dev_status = extract_filtered_series(unsd_data_frame, 'country_area_development_status')
-	unsd_dev_status_csv = './output/unsd_dev_status.csv'
+	unsd_dev_status_csv = './output/unesco/unsd_dev_status.csv'
 	write_series_to_csv(unsd_dev_status, unsd_dev_status_csv, '\t', False)
 	logging.info(msg[5].format(os.path.abspath(unsd_dev_status_csv)))
 
@@ -73,25 +73,25 @@ def main(argv=None):
 
 	# Write UNESCO heritage site countries and areas to a .csv file
 	unesco_country_area = extract_filtered_series(unesco_data_frame, 'country_area')
-	unesco_country_area_csv = './output/unesco_heritage_site_country_area.csv'
+	unesco_country_area_csv = './output/unesco/unesco_heritage_site_country_area.csv'
 	write_series_to_csv(unesco_country_area, unesco_country_area_csv, '\t', False)
 	logging.info(msg[6].format(os.path.abspath(unesco_country_area_csv)))
 
 	# Write UNESCO heritage site categories to a .csv file
 	unesco_site_category = extract_filtered_series(unesco_data_frame, 'category')
-	unesco_site_category_csv = './output/unesco_heritage_site_category.csv'
+	unesco_site_category_csv = './output/unesco/unesco_heritage_site_category.csv'
 	write_series_to_csv(unesco_site_category, unesco_site_category_csv, '\t', False)
 	logging.info(msg[7].format(os.path.abspath(unesco_site_category_csv)))
 
 	# Write UNESCO heritage site regions to a .csv file
 	unesco_region = extract_filtered_series(unesco_data_frame, 'region')
-	unesco_region_csv = './output/unesco_heritage_site_region.csv'
+	unesco_region_csv = './output/unesco/unesco_heritage_site_region.csv'
 	write_series_to_csv(unesco_region, unesco_region_csv, '\t', False)
 	logging.info(msg[8].format(os.path.abspath(unesco_region_csv)))
 
 	# Write UNESCO heritage site transboundary values to a .csv file
 	unesco_transboundary = extract_filtered_series(unesco_data_frame, 'transboundary')
-	unesco_transboundary_csv = './output/unesco_heritage_site_transboundary.csv'
+	unesco_transboundary_csv = './output/unesco/unesco_heritage_site_transboundary.csv'
 	write_series_to_csv(unesco_transboundary, unesco_transboundary_csv, '\t', False)
 	logging.info(msg[9].format(os.path.abspath(unesco_transboundary_csv)))
 
