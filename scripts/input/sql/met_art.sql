@@ -3,9 +3,7 @@
 --
 SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS artist, artwork, artwork_artist, artwork_attribution, artist_role,
-                     artwork_type, classification, city, country, department, region, repository,
-                     temp_artwork, temp_artwork_artist, temp_artwork_artist_attribution,
-                     temp_artwork_artist_role, temp_city, temp_classification, temp_region;
+                     artwork_type, classification, city, country, department, region, repository;
 SET FOREIGN_KEY_CHECKS=1;
 
 --
@@ -62,7 +60,7 @@ INTO TABLE country
 -- 2.3 temp city table
 -- Temp table includes lookup country_name.
 --
-CREATE TABLE IF NOT EXISTS temp_city (
+CREATE TEMPORARY TABLE temp_city (
   temp_city_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   city_name VARCHAR(255) NOT NULL UNIQUE,
   country_name VARCHAR(255) NULL,
@@ -109,11 +107,14 @@ SELECT tc.city_name, c.country_id
 WHERE TRIM(tc.city_name) IS NOT NULL AND TRIM(tc.city_name) != ''
 ORDER BY tc.city_name;
 
+-- Drop temp_city
+DROP TEMPORARY TABLE temp_city;
+
 --
 -- 2.5 temp region table
 -- Temp table includes lookup country_name.
 --
-CREATE TABLE IF NOT EXISTS temp_region (
+CREATE TEMPORARY TABLE temp_region (
   temp_region_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   region_name VARCHAR(255) NOT NULL UNIQUE,
   country_name VARCHAR(255) NULL,
@@ -160,11 +161,14 @@ SELECT tr.region_name, c.country_id
 WHERE TRIM(tr.region_name) IS NOT NULL AND TRIM(tr.region_name) != ''
 ORDER BY tr.region_name;
 
+-- Drop temp_region
+DROP TEMPORARY TABLE temp_region;
+
 --
 -- 2.6 temp classification table
 -- Temp table required because source data is messy.
 --
-CREATE TABLE IF NOT EXISTS temp_classification (
+CREATE TEMPORARY TABLE temp_classification (
   temp_classification_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   classification_name VARCHAR(255) NOT NULL UNIQUE,
   PRIMARY KEY (temp_classification_id)
@@ -206,6 +210,9 @@ SELECT classification_name
 FROM temp_classification tc
 WHERE TRIM(tc.classification_name) NOT like ',%'
 ORDER BY tc.temp_classification_id;
+
+-- Drop temp_classification
+DROP TEMPORARY TABLE temp_classification;
 
 --
 -- 2.8 department table
@@ -296,7 +303,7 @@ INTO TABLE repository
 -- Link Resource
 -- Repository
 
-CREATE TABLE IF NOT EXISTS temp_artwork (
+CREATE TEMPORARY TABLE temp_artwork (
   temp_artwork_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   accession_number VARCHAR(50) NULL,
   is_public_domain CHAR(5) NULL,
@@ -479,6 +486,9 @@ SELECT ta.accession_number,
               ON TRIM(ta.repository_name) = TRIM(repo.repository_name)
  ORDER BY ta.temp_artwork_id;
 
+-- Drop temp_artwork
+DROP TEMPORARY TABLE temp_artwork;
+
 --
 -- 3.3 Artist table
 --
@@ -503,7 +513,7 @@ INTO TABLE artist
   (artist_display_name);
 
 --
--- 3.4 Temp artist role table
+-- 3.4 artist role table
 -- WARN: 2nd row empty value (IGNORE 2 LINES)
 --
 CREATE TABLE IF NOT EXISTS artist_role (
@@ -530,7 +540,7 @@ INTO TABLE artist_role
 -- 3.5 Temp artwork_artist M2M junction table
 --
 --
-CREATE TABLE IF NOT EXISTS temp_artwork_artist_role (
+CREATE TEMPORARY TABLE temp_artwork_artist_role (
   temp_artwork_artist_role_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   accession_number VARCHAR(50) NOT NULL,
   artwork_artist_index INTEGER NOT NULL,
@@ -579,7 +589,7 @@ INTO TABLE artwork_attribution
 -- 3.7 Temp artwork_artist_attribution M2M junction table
 --
 --
-CREATE TABLE IF NOT EXISTS temp_artwork_artist_attribution (
+CREATE TEMPORARY TABLE temp_artwork_artist_attribution (
   temp_artwork_artist_attribution_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   accession_number VARCHAR(50) NOT NULL,
   artwork_artist_index INTEGER NOT NULL,
@@ -604,7 +614,7 @@ INTO TABLE temp_artwork_artist_attribution
 --
 -- 3.8 Temp artwork_artist M2M junction table
 --
-CREATE TABLE IF NOT EXISTS temp_artwork_artist (
+CREATE TEMPORARY TABLE temp_artwork_artist (
   temp_artwork_artist_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   accession_number VARCHAR(50) NOT NULL,
   artwork_artist_index INTEGER NOT NULL,
@@ -679,3 +689,8 @@ SELECT art.artwork_id, aa.artwork_attribution_id, taa.artwork_artist_index,
        LEFT JOIN artwork_attribution aa
               ON TRIM(taaa.artwork_attribution) = TRIM(aa.artwork_attribution)
  ORDER BY artwork_id, artwork_artist_index;
+
+ -- Drop remaining temp tables
+DROP TEMPORARY TABLE temp_artwork_artist_role;
+DROP TEMPORARY TABLE temp_artwork_artist_attribution;
+DROP TEMPORARY TABLE temp_artwork_artist;
