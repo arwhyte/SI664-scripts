@@ -21,16 +21,16 @@ def main(argv=None):
 		'Source file read and trimmed version written to file {0}',
 		'Artwork types written to file {0}',
 		'Object data written to file {0}',
-		'Artists written to file {0}',
-		'Artist nationalities written to file {0}',
-		'Artist prefixes written to file {0}',
-		'Artist roles written to file {0}',
+		'Unique artists written to file {0}',
+		'Artwork artists written to file {0}',
+		'Unique roles written to file {0}',
+		'Artwork artist roles written to file {0}',
+		'Unique attributions written to file {0}',
+		'Artwork attributions written to file {0}',
 		'Cities written to file {0}',
 		'Classifications written to file {0}',
 		'Countries written to file {0}',
 		'Departments written to file {0}',
-		'Medium written to file {0}',
-		'In Public Domain written to file {0}',
 		'Regions written to file {0}',
 		'Repositories written to file {0}',
 	]
@@ -45,53 +45,164 @@ def main(argv=None):
 	# logging.info(msg[0].format(encoding))
 
 	# Read in source with correct encoding and remove whitespace.
-	source_data_frame = pd.read_excel(source_path, sheet_name='all_data', header=0)
-	# source_data_frame = read_csv(source_path, encoding, '\t')
-	source_data_frame_trimmed = trim_columns(source_data_frame)
+	source = pd.read_excel(source_path, sheet_name='all_data', header=0)
+	# source = read_csv(source_path, encoding, '\t')
+	source_trimmed = trim_columns(source)
 
 	# Turned off as trimmed source file now includes manual fixes
 	source_trimmed_csv = os.path.join('output', 'met_artwork', 'met_artwork-trimmed.csv')
-	write_series_to_csv(source_data_frame_trimmed, source_trimmed_csv, '\t', False)
+	write_series_to_csv(source_trimmed, source_trimmed_csv, '\t', False)
 	logging.info(msg[1].format(os.path.abspath(source_trimmed_csv)))
 
 	# Write artwork types to a .csv file.
-	artwork_types = extract_filtered_series(source_data_frame_trimmed, ['Object Name'])
+	artwork_types = extract_filtered_series(source_trimmed, ['Object Name'])
 	artwork_types_csv = os.path.join('output', 'met_artwork', 'met_artwork_types.csv')
 	write_series_to_csv(artwork_types, artwork_types_csv, '\t', False)
 	logging.info(msg[2].format(os.path.abspath(artwork_types_csv)))
 
+	artists = extract_filtered_series(source_trimmed, ['Artist Alpha Sort'])
+	artists['Artist Alpha Sort'] = artists['Artist Alpha Sort'].str.split('|', n=-1, expand=False)
+	artists_split = artists['Artist Alpha Sort'].apply(pd.Series) \
+		.reset_index() \
+		.melt(id_vars=['index'], value_name='artist') \
+		.dropna(axis=0, how='any')[['index', 'artist']] \
+		.drop_duplicates(subset=['artist']) \
+		.set_index('index') \
+		.sort_values(by=['artist'])
+	artists_out = os.path.join('output', 'met_artwork', 'met_artists_unique.csv')
+	write_series_to_csv(artists_split, artists_out, ',', False)
+	logging.info(msg[4].format(os.path.abspath(artists_out)))
+
+	# Store the movie - genres associations vertically
+	# First convert genres pipe delimited string to a list, then do the merge and melt.
+	# Errors thrown on Object Number (Pandas can't decide if values are strings, floats or integers
+	# sort_values() throws errors
+	artwork_artists = source_trimmed[['Object Number', 'Artist Alpha Sort']]\
+		.dropna(axis=0, how='all')\
+		.drop_duplicates(subset=['Object Number', 'Artist Alpha Sort'])
+
+	# Convert dataframe column to string (.astype(str))
+	artwork_artists['Object Number'] = artwork_artists['Object Number'].astype(str)
+
+	# Data intended for M2M junction table; rows with no artist listed can be dropped
+	# Don't delete variable
+	# .drop('variable', axis=1).
+	# Use it as an index to match artists to roles, etc.
+
+	artwork_artists['Artist Alpha Sort'] = artwork_artists['Artist Alpha Sort'].str.split('|', n=-1, expand=False)
+	artwork_artists_split = artwork_artists['Artist Alpha Sort'].apply(pd.Series) \
+		.merge(artwork_artists, left_index=True, right_index=True) \
+		.drop(['Artist Alpha Sort'], axis=1) \
+		.melt(id_vars=['Object Number'], value_name='artist') \
+		.dropna(axis=0, how='any') \
+		.drop_duplicates(subset=['Object Number', 'artist']) \
+		.sort_values(by=['Object Number', 'variable'])
+	artwork_artists_out = os.path.join(
+		'output',
+		'met_artwork',
+		'met_artwork-artwork_artists-split.csv'
+	)
+	write_series_to_csv(artwork_artists_split, artwork_artists_out, ',', False)
+	logging.info(msg[5].format(os.path.abspath(artwork_artists_out)))
+
+	roles = extract_filtered_series(source_trimmed, ['Artist Role'])
+	roles['Artist Role'] = roles['Artist Role'].str.split('|', n=-1, expand=False)
+	roles_split = roles['Artist Role'].apply(pd.Series) \
+		.reset_index() \
+		.melt(id_vars=['index'], value_name='role') \
+		.dropna(axis=0, how='any')[['index', 'role']] \
+		.drop_duplicates(subset=['role']) \
+		.set_index('index') \
+		.sort_values(by=['role'])
+	roles_out = os.path.join('output', 'met_artwork', 'met_roles_unique.csv')
+	write_series_to_csv(roles_split, roles_out, ',', False)
+	logging.info(msg[6].format(os.path.abspath(roles_out)))
+
+	# DO NOT filter out duplicate roles - 2+ artists associated with a work
+	# can be assigned the same role.
+	artwork_roles = source_trimmed[['Object Number', 'Artist Role']] \
+		.dropna(axis=0, how='all')
+	artwork_roles['Object Number'] = artwork_roles['Object Number'].astype(str)
+	artwork_roles['Artist Role'] = artwork_roles['Artist Role'].str.split('|', n=-1, expand=False)
+	artwork_roles_split = artwork_roles['Artist Role'].apply(pd.Series) \
+		.merge(artwork_roles, left_index=True, right_index=True) \
+		.drop(['Artist Role'], axis=1) \
+		.melt(id_vars=['Object Number'], value_name='role') \
+		.dropna(axis=0, how='any') \
+		.sort_values(by=['Object Number', 'variable'])
+	artwork_roles_out = os.path.join(
+		'output',
+		'met_artwork',
+		'met_artwork-artwork_roles-split.csv'
+	)
+	write_series_to_csv(artwork_roles_split, artwork_roles_out, ',', False)
+	logging.info(msg[7].format(os.path.abspath(artwork_roles_out)))
+
+	attribution = extract_filtered_series(source_trimmed, ['Artist Prefix'])
+	attribution['Artist Prefix'] = attribution['Artist Prefix'].str.split('|', n=-1, expand=False)
+	attribution_split = attribution['Artist Prefix'].apply(pd.Series) \
+		.reset_index() \
+		.melt(id_vars=['index'], value_name='attribution') \
+		.dropna(axis=0, how='any')[['index', 'attribution']] \
+		.drop_duplicates(subset=['attribution']) \
+		.set_index('index') \
+		.sort_values(by=['attribution'])
+	attribution_out = os.path.join('output', 'met_artwork', 'met_attribution_unique.csv')
+	write_series_to_csv(attribution_split, attribution_out, ',', False)
+	logging.info(msg[6].format(os.path.abspath(attribution_out)))
+
+	# DO NOT filter out duplicate attributions - 2+ artists associated with a work
+	# can be assigned the same attribution.
+	artwork_attribution = source_trimmed[['Object Number', 'Artist Prefix']] \
+		.dropna(axis=0, how='all')
+	artwork_attribution['Object Number'] = artwork_attribution['Object Number'].astype(str)
+	artwork_attribution['Artist Prefix'] = artwork_attribution['Artist Prefix'].str.split('|', n=-1, expand=False)
+	artwork_attribution_split = artwork_attribution['Artist Prefix'].apply(pd.Series) \
+		.merge(artwork_attribution, left_index=True, right_index=True) \
+		.drop(['Artist Prefix'], axis=1) \
+		.melt(id_vars=['Object Number'], value_name='attribution') \
+		.dropna(axis=0, how='any') \
+		.sort_values(by=['Object Number', 'variable'])
+	artwork_attribution_out = os.path.join(
+		'output',
+		'met_artwork',
+		'met_artwork-artwork_attribution-split.csv'
+	)
+	write_series_to_csv(artwork_attribution_split, artwork_attribution_out, ',', False)
+	logging.info(msg[7].format(os.path.abspath(artwork_attribution_out)))
+
 	# Write cities and countries (the latter will be replaced with a FK) to a .csv file.
-	cities = extract_filtered_series(source_data_frame_trimmed, ['City','Country'])
+	cities = extract_filtered_series(source_trimmed, ['City', 'Country'])
 	cities_csv = os.path.join('output', 'met_artwork', 'met_cities.csv')
 	write_series_to_csv(cities, cities_csv, '\t', False)
-	logging.info(msg[8].format(os.path.abspath(cities_csv)))
+	logging.info(msg[10].format(os.path.abspath(cities_csv)))
+
+	# Write classification to a .csv file.
+	classifications = extract_filtered_series(source_trimmed, ['Classification'])
+	classifications_csv = os.path.join('output', 'met_artwork', 'met_classifications.csv')
+	write_series_to_csv(classifications, classifications_csv, '\t', False)
+	logging.info(msg[11].format(os.path.abspath(classifications_csv)))
+
+	# Write countries to a .csv file.
+	countries = extract_filtered_series(source_trimmed, ['Country'])
+	countries_csv = os.path.join('output', 'met_artwork', 'met_countries.csv')
+	write_series_to_csv(countries, countries_csv, '\t', False)
+	logging.info(msg[12].format(os.path.abspath(countries_csv)))
+
+	# Write departments to a .csv file
+	departments = extract_filtered_series(source_trimmed, ['Department'])
+	departments_csv = os.path.join('output', 'met_artwork', 'met_departments.csv')
+	write_series_to_csv(departments, departments_csv, '\t', False)
+	logging.info(msg[13].format(os.path.abspath(departments_csv)))
 
 	# Write regions and countries (the latter will be replaced with a FK) to a .csv file.
-	regions = extract_filtered_series(source_data_frame_trimmed, ['Region','Country'])
+	regions = extract_filtered_series(source_trimmed, ['Region', 'Country'])
 	regions_csv = os.path.join('output', 'met_artwork', 'met_regions.csv')
 	write_series_to_csv(regions, regions_csv, '\t', False)
 	logging.info(msg[14].format(os.path.abspath(regions_csv)))
 
-	# Write classification to a .csv file.
-	classifications = extract_filtered_series(source_data_frame_trimmed, ['Classification'])
-	classifications_csv = os.path.join('output', 'met_artwork', 'met_classifications.csv')
-	write_series_to_csv(classifications, classifications_csv, '\t', False)
-	logging.info(msg[9].format(os.path.abspath(classifications_csv)))
-
-	# Write countries to a .csv file.
-	countries = extract_filtered_series(source_data_frame_trimmed, ['Country'])
-	countries_csv = os.path.join('output', 'met_artwork', 'met_countries.csv')
-	write_series_to_csv(countries, countries_csv, '\t', False)
-	logging.info(msg[10].format(os.path.abspath(countries_csv)))
-
-	# Write departments to a .csv file
-	departments = extract_filtered_series(source_data_frame_trimmed, ['Department'])
-	departments_csv = os.path.join('output', 'met_artwork', 'met_departments.csv')
-	write_series_to_csv(departments, departments_csv, '\t', False)
-	logging.info(msg[11].format(os.path.abspath(departments_csv)))
-
 	# Write repositories to a .csv file
-	repositories = extract_filtered_series(source_data_frame_trimmed, ['Repository'])
+	repositories = extract_filtered_series(source_trimmed, ['Repository'])
 	repositories_csv = os.path.join('output', 'met_artwork', 'met_repositories.csv')
 	write_series_to_csv(repositories, repositories_csv, '\t', False)
 	logging.info(msg[15].format(os.path.abspath(repositories_csv)))
@@ -107,8 +218,8 @@ def extract_filtered_series(data_frame, column_list):
 	:return: Panda Series one-dimensional ndarray
 	"""
 
-	return data_frame[column_list].drop_duplicates().dropna(axis=0, how='all').sort_values(
-		column_list)
+	return data_frame[column_list].drop_duplicates().dropna(axis=0, how='all')\
+		.sort_values(by=column_list)
 	# return data_frame[column_list].str.strip().drop_duplicates().dropna().sort_values()
 
 
