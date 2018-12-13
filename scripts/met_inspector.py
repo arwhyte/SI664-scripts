@@ -60,42 +60,39 @@ def main(argv=None):
 	write_series_to_csv(artwork_types, artwork_types_csv, '\t', False)
 	logging.info(msg[2].format(os.path.abspath(artwork_types_csv)))
 
-	artists = extract_filtered_series(source_trimmed, ['Artist Alpha Sort'])
-	artists['Artist Alpha Sort'] = artists['Artist Alpha Sort'].str.split('|', n=-1, expand=False)
-	artists_split = artists['Artist Alpha Sort'].apply(pd.Series) \
+	artists = extract_filtered_series(source_trimmed, ['Artist Display Name'])
+	artists['Artist Display Name'] = artists['Artist Display Name'].str.split('|', n=-1, expand=False)
+	artists_split = artists['Artist Display Name'].apply(pd.Series) \
 		.reset_index() \
 		.melt(id_vars=['index'], value_name='artist') \
 		.dropna(axis=0, how='any')[['index', 'artist']] \
-		.drop_duplicates(subset=['artist']) \
+		.drop_duplicates(axis=0, subset=['artist']) \
 		.set_index('index') \
 		.sort_values(by=['artist'])
 	artists_out = os.path.join('output', 'met_artwork', 'met_artists_unique.csv')
 	write_series_to_csv(artists_split, artists_out, ',', False)
 	logging.info(msg[4].format(os.path.abspath(artists_out)))
 
-	# Store the movie - genres associations vertically
-	# First convert genres pipe delimited string to a list, then do the merge and melt.
+	# Store the artwork artist associations vertically
+	# First convert artwork_artists pipe delimited string to a list, then do the merge and melt.
 	# Errors thrown on Object Number (Pandas can't decide if values are strings, floats or integers
 	# sort_values() throws errors
-	artwork_artists = source_trimmed[['Object Number', 'Artist Alpha Sort']]\
+	artwork_artists = source_trimmed[['Object Number', 'Artist Display Name']]\
 		.dropna(axis=0, how='all')\
-		.drop_duplicates(subset=['Object Number', 'Artist Alpha Sort'])
-
-	# Convert dataframe column to string (.astype(str))
-	artwork_artists['Object Number'] = artwork_artists['Object Number'].astype(str)
+		.drop_duplicates(subset=['Object Number', 'Artist Display Name'])
 
 	# Data intended for M2M junction table; rows with no artist listed can be dropped
 	# Don't delete variable
 	# .drop('variable', axis=1).
 	# Use it as an index to match artists to roles, etc.
-
-	artwork_artists['Artist Alpha Sort'] = artwork_artists['Artist Alpha Sort'].str.split('|', n=-1, expand=False)
-	artwork_artists_split = artwork_artists['Artist Alpha Sort'].apply(pd.Series) \
+	artwork_artists['Object Number'] = artwork_artists['Object Number'].astype(str)
+	artwork_artists['Artist Display Name'] = artwork_artists['Artist Display Name'].str.split('|', n=-1, expand=False)
+	artwork_artists_split = artwork_artists['Artist Display Name'].apply(pd.Series) \
 		.merge(artwork_artists, left_index=True, right_index=True) \
-		.drop(['Artist Alpha Sort'], axis=1) \
+		.drop(['Artist Display Name'], axis=1) \
 		.melt(id_vars=['Object Number'], value_name='artist') \
-		.dropna(axis=0, how='any') \
-		.drop_duplicates(subset=['Object Number', 'artist']) \
+		.dropna(axis=0, subset=['artist']) \
+		.drop_duplicates(axis=0, subset=['artist']) \
 		.sort_values(by=['Object Number', 'variable'])
 	artwork_artists_out = os.path.join(
 		'output',
@@ -111,7 +108,7 @@ def main(argv=None):
 		.reset_index() \
 		.melt(id_vars=['index'], value_name='role') \
 		.dropna(axis=0, how='any')[['index', 'role']] \
-		.drop_duplicates(subset=['role']) \
+		.drop_duplicates(axis=0, subset=['role']) \
 		.set_index('index') \
 		.sort_values(by=['role'])
 	roles_out = os.path.join('output', 'met_artwork', 'met_roles_unique.csv')
@@ -128,7 +125,7 @@ def main(argv=None):
 		.merge(artwork_roles, left_index=True, right_index=True) \
 		.drop(['Artist Role'], axis=1) \
 		.melt(id_vars=['Object Number'], value_name='role') \
-		.dropna(axis=0, how='any') \
+		.dropna(axis=0, subset=['role']) \
 		.sort_values(by=['Object Number', 'variable'])
 	artwork_roles_out = os.path.join(
 		'output',
@@ -144,7 +141,7 @@ def main(argv=None):
 		.reset_index() \
 		.melt(id_vars=['index'], value_name='attribution') \
 		.dropna(axis=0, how='any')[['index', 'attribution']] \
-		.drop_duplicates(subset=['attribution']) \
+		.drop_duplicates(axis=0, subset=['attribution']) \
 		.set_index('index') \
 		.sort_values(by=['attribution'])
 	attribution_out = os.path.join('output', 'met_artwork', 'met_attribution_unique.csv')
@@ -161,7 +158,7 @@ def main(argv=None):
 		.merge(artwork_attribution, left_index=True, right_index=True) \
 		.drop(['Artist Prefix'], axis=1) \
 		.melt(id_vars=['Object Number'], value_name='attribution') \
-		.dropna(axis=0, how='any') \
+		.dropna(axis=0, subset=['attribution']) \
 		.sort_values(by=['Object Number', 'variable'])
 	artwork_attribution_out = os.path.join(
 		'output',
