@@ -105,7 +105,7 @@ def extract_filtered_series(data_frame, column_name):
 	:param column_name: column name string
 	:return: Panda Series one-dimensional ndarray
 	"""
-	return data_frame[column_name].drop_duplicates().dropna().sort_values()
+	return data_frame[column_name].drop_duplicates().dropna().sort_values(by=column_name)
 
 
 def read_csv(path, delimiter=','):

@@ -119,8 +119,7 @@ def extract_filtered_series(data_frame, column_list):
 	:return: Panda Series one-dimensional ndarray
 	"""
 
-	return data_frame[column_list].drop_duplicates().dropna(axis=0, how='all').sort_values(
-		column_list)
+	return data_frame[column_list].drop_duplicates().dropna(axis=0, how='all').sort_values(by=column_list)
 # return data_frame[column_list].str.strip().drop_duplicates().dropna().sort_values()
 
 
