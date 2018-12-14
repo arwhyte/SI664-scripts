@@ -4,15 +4,8 @@
 -- 1.0 Setup. Delete tables after every build iteration.
 --
 SET FOREIGN_KEY_CHECKS=0;
-DROP TABLE IF EXISTS actor, country, director, genre, keyword, movie, movie_actor,
-movie_genre,
-                     movie_keywords, movie_language, rating,
-                     temp_actor_one, temp_actor_two, temp_actor_three, temp_country, temp_director,
-                     temp_genre,
-                     temp_keyword,
-                     temp_language,
-                     temp_movie,
-                     temp_rating;
+DROP TABLE IF EXISTS country, director, genre, keyword, movie, movie_genre,
+                     movie_keyword, movie_language, rating;
 SET FOREIGN_KEY_CHECKS=1;
 
 --
@@ -155,7 +148,7 @@ INTO TABLE rating
 --
 -- 3.1 temp movie country table
 --
-CREATE TABLE IF NOT EXISTS temp_country (
+CREATE TEMPORARY TABLE temp_country (
   temp_country_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_title VARCHAR(500) NOT NULL,
   country_name VARCHAR(100) NOT NULL,
@@ -177,7 +170,7 @@ INTO TABLE temp_country
 --
 -- 3.2 temp movie director table
 --
-CREATE TABLE IF NOT EXISTS temp_director (
+CREATE TEMPORARY TABLE temp_director (
   temp_director_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_title VARCHAR(500) NOT NULL,
   director_name VARCHAR(250) NOT NULL,
@@ -199,7 +192,7 @@ INTO TABLE temp_director
 --
 -- 3.3 temp movie genres table
 --
-CREATE TABLE IF NOT EXISTS temp_genre (
+CREATE TEMPORARY TABLE temp_genre (
   temp_genre_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_title VARCHAR(500) NOT NULL,
   genre_name VARCHAR(255) NOT NULL,
@@ -221,7 +214,7 @@ INTO TABLE temp_genre
 --
 -- 3.4 temp movie genres table
 --
-CREATE TABLE IF NOT EXISTS temp_keyword (
+CREATE TEMPORARY TABLE temp_keyword (
   temp_keyword_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_title VARCHAR(500) NOT NULL,
   keyword_name VARCHAR(255) NOT NULL,
@@ -243,7 +236,7 @@ INTO TABLE temp_keyword
 --
 -- 3.5 temp movie language table
 --
-CREATE TABLE IF NOT EXISTS temp_language (
+CREATE TEMPORARY TABLE temp_language (
   temp_language_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_title VARCHAR(500) NOT NULL,
   language_name VARCHAR(255) NOT NULL,
@@ -265,7 +258,7 @@ INTO TABLE temp_language
 --
 -- 3.5 temp movie rating table
 --
-CREATE TABLE IF NOT EXISTS temp_rating (
+CREATE TEMPORARY TABLE temp_rating (
   temp_rating_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_title VARCHAR(500) NOT NULL,
   rating_name VARCHAR(255) NOT NULL,
@@ -285,127 +278,9 @@ INTO TABLE temp_rating
   (movie_title, rating_name);
 
 --
--- 4.0 Populate actor table (three temp tables)
+-- 4.0 temp movie table
 --
-
---
--- 4.1 temp actor 1 table
---
-CREATE TABLE IF NOT EXISTS temp_actor_one (
-  temp_actor_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  movie_title VARCHAR(500) NOT NULL,
-  actor_name VARCHAR(255) NOT NULL,
-  actor_facebook_likes INTEGER NULL,
-  PRIMARY KEY (temp_actor_id)
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
-
-LOAD DATA LOCAL INFILE './output/movies/actor_1.csv'
-INTO TABLE temp_actor_one
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (movie_title, actor_name, actor_facebook_likes);
-
---
--- 4.2 temp actor 2 table
---
-CREATE TABLE IF NOT EXISTS temp_actor_two (
-  temp_actor_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  movie_title VARCHAR(500) NOT NULL,
-  actor_name VARCHAR(255) NOT NULL,
-  actor_facebook_likes INTEGER NULL,
-  PRIMARY KEY (temp_actor_id)
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
-
-LOAD DATA LOCAL INFILE './output/movies/actor_2.csv'
-INTO TABLE temp_actor_two
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (movie_title, actor_name, actor_facebook_likes);
-
---
--- 4.3 temp actor 3 table
---
-CREATE TABLE IF NOT EXISTS temp_actor_three (
-  temp_actor_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  movie_title VARCHAR(500) NOT NULL,
-  actor_name VARCHAR(255) NOT NULL,
-  actor_facebook_likes INTEGER NULL,
-  PRIMARY KEY (temp_actor_id)
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
-
-LOAD DATA LOCAL INFILE './output/movies/actor_3.csv'
-INTO TABLE temp_actor_three
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (movie_title, actor_name, actor_facebook_likes);
-
---
--- 4.4 actor table
---
-CREATE TABLE IF NOT EXISTS actor (
-  actor_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  actor_name VARCHAR(255) NOT NULL,
-  PRIMARY KEY (actor_id)
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
-
--- Populate actor table with Actor 1 group
-INSERT IGNORE INTO actor
-(
-  actor_name
-)
-SELECT DISTINCT actor_name
-  FROM temp_actor_one
- ORDER BY actor_name;
-
--- Populate actor table with Actor 2 group, filtering out dups
-INSERT IGNORE INTO actor
-(
-  actor_name
-)
-SELECT DISTINCT ta2.actor_name
-FROM  temp_actor_two ta2
-WHERE TRIM(ta2.actor_name) NOT IN
-    (SELECT TRIM(a.actor_name) AS actor_name
-    FROM actor a
-    ORDER BY a.actor_name);
-
--- Populate actor table with Actor 3 group, filtering out dups
-INSERT IGNORE INTO actor
-(
-  actor_name
-)
-SELECT DISTINCT ta3.actor_name
-FROM  temp_actor_three ta3
-WHERE TRIM(ta3.actor_name) NOT IN
-    (SELECT TRIM(a.actor_name) AS actor_name
-    FROM actor a
-    ORDER BY a.actor_name);
-
---
--- 5.0 temp movie table
---
-CREATE TABLE IF NOT EXISTS temp_movie (
+CREATE TEMPORARY TABLE temp_movie (
   movie_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   title VARCHAR(500) NOT NULL,
   release_year CHAR(6) NULL,
@@ -444,7 +319,7 @@ INTO TABLE temp_movie
 
 
 --
--- 5.0 movie table
+-- 4.1 movie table
 --
 CREATE TABLE IF NOT EXISTS movie (
   movie_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -513,8 +388,15 @@ SELECT tm.title, tm.release_year, d.director_id, c.country_id, ml.language_id,
               ON TRIM(tr.rating_name) = TRIM(r.rating_name)
  ORDER BY tm.movie_id;
 
+-- Drop temp tables
+DROP TEMPORARY TABLE temp_country;
+DROP TEMPORARY TABLE temp_director;
+DROP TEMPORARY TABLE temp_language;
+DROP TEMPORARY TABLE temp_rating;
+DROP TEMPORARY TABLE temp_movie;
+
 --
--- 5.1 movie genres table
+-- 5.0 movie genres table
 --
 CREATE TABLE IF NOT EXISTS movie_genre (
   movie_genre_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -544,15 +426,18 @@ FROM movie m
 WHERE g.genre_id IS NOT NULL
 ORDER BY m.movie_id, g.genre_id;
 
+-- Drop temp table
+DROP TEMPORARY TABLE temp_genre;
+
 --
--- 5.2 movie keyword table
+-- 6.0 movie keyword table
 --
 
 CREATE TABLE IF NOT EXISTS movie_keyword (
   movie_keyword_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
   movie_id INTEGER NOT NULL,
   keyword_id INTEGER NOT NULL,
-  PRIMARY KEY (movie_genre_id),
+  PRIMARY KEY (movie_keyword_id),
   FOREIGN KEY (movie_id) REFERENCES movie(movie_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (keyword_id) REFERENCES keyword(keyword_id)
@@ -562,16 +447,18 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO movie_genre
+INSERT IGNORE INTO movie_keyword
 (
   movie_id,
   keyword_id
 )
-SELECT m.movie_id, g.keyword_id
+SELECT m.movie_id, k.keyword_id
   FROM movie m
        LEFT JOIN temp_keyword tk
               ON TRIM(m.title) = TRIM(tk.movie_title)
        LEFT JOIN keyword k
               ON TRIM(tk.keyword_name) = TRIM(k.keyword_name)
- WHERE k.keyword_id IS NOT NULL
  ORDER BY m.movie_id, k.keyword_id;
+
+ -- Drop temp table
+DROP TEMPORARY TABLE temp_keyword;

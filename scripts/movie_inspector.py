@@ -88,30 +88,48 @@ def main(argv=None):
     write_series_to_csv(movie_directors, movie_directors_out, ',', False)
     logging.info(msg[3].format(os.path.abspath(movie_directors_out)))
 
-    actor_1 = source_trimmed[['movie_title', 'actor_1_name', 'actor_1_facebook_likes']] \
+    actor_1 = source_trimmed[[
+        'movie_title',
+        'title_year',
+        'movie_imdb_link',
+        'actor_1_name',
+        'actor_1_facebook_likes']] \
         .dropna(axis=0, subset=['actor_1_name']) \
-        .drop_duplicates(subset=['movie_title', 'actor_1_name'])\
-        .sort_values(by=['movie_title', 'actor_1_name'])
+        .drop_duplicates(subset=['movie_title', 'title_year', 'movie_imdb_link', 'actor_1_name'])\
+        .sort_values(by=['movie_title', 'title_year', 'movie_imdb_link', 'actor_1_name'])
     actor_1['movie_title'] = actor_1['movie_title'].astype(str)
+    actor_1['movie_actor_index'] = 1
     actor_1_out = os.path.join('output', 'movies', 'actor_1.csv')
     write_series_to_csv(actor_1, actor_1_out, ',', False)
     logging.info(msg[4].format(os.path.abspath(actor_1_out)))
 
     # Repeat for actors 2 and 3.
-    actor_2 = source_trimmed[['movie_title', 'actor_2_name', 'actor_2_facebook_likes']] \
+    actor_2 = source_trimmed[[
+        'movie_title',
+        'title_year',
+        'movie_imdb_link',
+        'actor_2_name',
+        'actor_2_facebook_likes']] \
         .dropna(axis=0, subset=['actor_2_name']) \
-        .drop_duplicates(subset=['movie_title', 'actor_2_name'])\
-        .sort_values(by=['movie_title', 'actor_2_name'])
+        .drop_duplicates(subset=['movie_title', 'title_year','movie_imdb_link', 'actor_2_name'])\
+        .sort_values(by=['movie_title', 'title_year', 'movie_imdb_link', 'actor_2_name'])
     actor_2['movie_title'] = actor_2['movie_title'].astype(str)
+    actor_2['movie_actor_index'] = 2
     actor_2_out = os.path.join('output', 'movies', 'actor_2.csv')
     write_series_to_csv(actor_2, actor_2_out, ',', False)
     logging.info(msg[5].format(os.path.abspath(actor_2_out)))
 
-    actor_3 = source_trimmed[['movie_title', 'actor_3_name', 'actor_3_facebook_likes']] \
+    actor_3 = source_trimmed[[
+        'movie_title',
+        'title_year',
+        'movie_imdb_link',
+        'actor_3_name',
+        'actor_3_facebook_likes']] \
         .dropna(axis=0, subset=['actor_3_name']) \
-        .drop_duplicates(subset=['movie_title', 'actor_3_name'])\
-        .sort_values(by=['movie_title', 'actor_3_name'])
+        .drop_duplicates(subset=['movie_title', 'title_year', 'movie_imdb_link', 'actor_3_name'])\
+        .sort_values(by=['movie_title', 'title_year', 'movie_imdb_link', 'actor_3_name'])
     actor_3['movie_title'] = actor_3['movie_title'].astype(str)
+    actor_3['movie_actor_index'] = 3
     actor_3_out = os.path.join('output', 'movies', 'actor_3.csv')
     write_series_to_csv(actor_3, actor_3_out, ',', False)
     logging.info(msg[6].format(os.path.abspath(actor_3_out)))
