@@ -1,0 +1,323 @@
+IATA_CODE,CITY,STATE,COUNTRY
+ABE,Allentown,PA,USA
+ABI,Abilene,TX,USA
+ABQ,Albuquerque,NM,USA
+ABR,Aberdeen,SD,USA
+ABY,Albany,GA,USA
+ACK,Nantucket,MA,USA
+ACT,Waco,TX,USA
+ACV,Arcata/Eureka,CA,USA
+ACY,Atlantic City,NJ,USA
+ADK,Adak,AK,USA
+ADQ,Kodiak,AK,USA
+AEX,Alexandria,LA,USA
+AGS,Augusta,GA,USA
+AKN,King Salmon,AK,USA
+ALB,Albany,NY,USA
+ALO,Waterloo,IA,USA
+AMA,Amarillo,TX,USA
+ANC,Anchorage,AK,USA
+APN,Alpena,MI,USA
+ASE,Aspen,CO,USA
+ATL,Atlanta,GA,USA
+ATW,Appleton,WI,USA
+AUS,Austin,TX,USA
+AVL,Asheville,NC,USA
+AVP,Wilkes-Barre/Scranton,PA,USA
+AZO,Kalamazoo,MI,USA
+BDL,Windsor Locks,CT,USA
+BET,Bethel,AK,USA
+BFL,Bakersfield,CA,USA
+BGM,Binghamton,NY,USA
+BGR,Bangor,ME,USA
+BHM,Birmingham,AL,USA
+BIL,Billings,MT,USA
+BIS,Bismarck,ND,USA
+BJI,Bemidji,MN,USA
+BLI,Bellingham,WA,USA
+BMI,Bloomington,IL,USA
+BNA,Nashville,TN,USA
+BOI,Boise,ID,USA
+BOS,Boston,MA,USA
+BPT,Beaumont/Port Arthur,TX,USA
+BQK,Brunswick,GA,USA
+BQN,Aguadilla,PR,USA
+BRD,Brainerd,MN,USA
+BRO,Brownsville,TX,USA
+BRW,Barrow,AK,USA
+BTM,Butte,MT,USA
+BTR,Baton Rouge,LA,USA
+BTV,Burlington,VT,USA
+BUF,Buffalo,NY,USA
+BUR,Burbank,CA,USA
+BWI,Baltimore,MD,USA
+BZN,Bozeman,MT,USA
+CAE,Columbia,SC,USA
+CAK,Akron,OH,USA
+CDC,Cedar City,UT,USA
+CDV,Cordova,AK,USA
+CEC,Crescent City,CA,USA
+CHA,Chattanooga,TN,USA
+CHO,Charlottesville,VA,USA
+CHS,Charleston,SC,USA
+CID,Cedar Rapids,IA,USA
+CIU,Sault Ste. Marie,MI,USA
+CLD,San Diego,CA,USA
+CLE,Cleveland,OH,USA
+CLL,College Station,TX,USA
+CLT,Charlotte,NC,USA
+CMH,Columbus,OH,USA
+CMI,Champaign/Urbana,IL,USA
+CMX,Hancock,MI,USA
+CNY,Moab,UT,USA
+COD,Cody,WY,USA
+COS,Colorado Springs,CO,USA
+COU,Columbia,MO,USA
+CPR,Casper,WY,USA
+CRP,Corpus Christi,TX,USA
+CRW,Charleston,WV,USA
+CSG,Columbus,GA,USA
+CVG,Covington,KY,USA
+CWA,Mosinee,WI,USA
+DAB,Daytona Beach,FL,USA
+DAL,Dallas,TX,USA
+DAY,Dayton,OH,USA
+DBQ,Dubuque,IA,USA
+DCA,Arlington,VA,USA
+DEN,Denver,CO,USA
+DFW,Dallas-Fort Worth,TX,USA
+DHN,Dothan,AL,USA
+DIK,Dickinson,ND,USA
+DLG,Dillingham,AK,USA
+DLH,Duluth,MN,USA
+DRO,Durango,CO,USA
+DSM,Des Moines,IA,USA
+DTW,Detroit,MI,USA
+DVL,Devils Lake,ND,USA
+EAU,Eau Claire,WI,USA
+ECP,Panama City,FL,USA
+EGE,Eagle,CO,USA
+EKO,Elko,NV,USA
+ELM,Elmira,NY,USA
+ELP,El Paso,TX,USA
+ERI,Erie,PA,USA
+ESC,Escanaba,MI,USA
+EUG,Eugene,OR,USA
+EVV,Evansville,IN,USA
+EWN,New Bern,NC,USA
+EWR,Newark,NJ,USA
+EYW,Key West,FL,USA
+FAI,Fairbanks,AK,USA
+FAR,Fargo,ND,USA
+FAT,Fresno,CA,USA
+FAY,Fayetteville,NC,USA
+FCA,Kalispell,MT,USA
+FLG,Flagstaff,AZ,USA
+FLL,Ft. Lauderdale,FL,USA
+FNT,Flint,MI,USA
+FSD,Sioux Falls,SD,USA
+FSM,Fort Smith,AR,USA
+FWA,Fort Wayne,IN,USA
+GCC,Gillette,WY,USA
+GCK,Garden City,KS,USA
+GEG,Spokane,WA,USA
+GFK,Grand Forks,ND,USA
+GGG,Longview,TX,USA
+GJT,Grand Junction,CO,USA
+GNV,Gainesville,FL,USA
+GPT,Gulfport-Biloxi,MS,USA
+GRB,Green Bay,WI,USA
+GRI,Grand Island,NE,USA
+GRK,Killeen,TX,USA
+GRR,Grand Rapids,MI,USA
+GSO,Greensboro,NC,USA
+GSP,Greer,SC,USA
+GST,Gustavus,AK,USA
+GTF,Great Falls,MT,USA
+GTR,Columbus-Starkville-West Point,MS,USA
+GUC,Gunnison,CO,USA
+GUM,Agana,GU,USA
+HDN,Hayden,CO,USA
+HIB,Hibbing,MN,USA
+HLN,Helena,MT,USA
+HNL,Honolulu,HI,USA
+HOB,Hobbs,NM,USA
+HOU,Houston,TX,USA
+HPN,White Plains,NY,USA
+HRL,Harlingen,TX,USA
+HSV,Huntsville,AL,USA
+HYA,Hyannis,MA,USA
+HYS,Hays,KS,USA
+IAD,Chantilly,VA,USA
+IAG,Niagara Falls,NY,USA
+IAH,Houston,TX,USA
+ICT,Wichita,KS,USA
+IDA,Idaho Falls,ID,USA
+ILG,Wilmington,DE,USA
+ILM,Wilmington,NC,USA
+IMT,Iron Mountain/Kingsford,MI,USA
+IND,Indianapolis,IN,USA
+INL,International Falls,MN,USA
+ISN,Williston,ND,USA
+ISP,Islip,NY,USA
+ITH,Ithaca,NY,USA
+ITO,Hilo,HI,USA
+JAC,Jackson,WY,USA
+JAN,Jackson,MS,USA
+JAX,Jacksonville,FL,USA
+JFK,New York,NY,USA
+JLN,Joplin,MO,USA
+JMS,Jamestown,ND,USA
+JNU,Juneau,AK,USA
+KOA,Kailua/Kona,HI,USA
+KTN,Ketchikan,AK,USA
+LAN,Lansing,MI,USA
+LAR,Laramie,WY,USA
+LAS,Las Vegas,NV,USA
+LAW,Lawton,OK,USA
+LAX,Los Angeles,CA,USA
+LBB,Lubbock,TX,USA
+LBE,Latrobe,PA,USA
+LCH,Lake Charles,LA,USA
+LEX,Lexington,KY,USA
+LFT,Lafayette,LA,USA
+LGA,New York,NY,USA
+LGB,Long Beach,CA,USA
+LIH,Lihue,HI,USA
+LIT,Little Rock,AR,USA
+LNK,Lincoln,NE,USA
+LRD,Laredo,TX,USA
+LSE,La Crosse,WI,USA
+LWS,Lewiston,ID,USA
+MAF,Midland,TX,USA
+MBS,Saginaw,MI,USA
+MCI,Kansas City,MO,USA
+MCO,Orlando,FL,USA
+MDT,Harrisburg,PA,USA
+MDW,Chicago,IL,USA
+MEI,Meridian,MS,USA
+MEM,Memphis,TN,USA
+MFE,McAllen,TX,USA
+MFR,Medford,OR,USA
+MGM,Montgomery,AL,USA
+MHK,Manhattan,KS,USA
+MHT,Manchester,NH,USA
+MIA,Miami,FL,USA
+MKE,Milwaukee,WI,USA
+MKG,Muskegon,MI,USA
+MLB,Melbourne,FL,USA
+MLI,Moline,IL,USA
+MLU,Monroe,LA,USA
+MMH,Mammoth Lakes,CA,USA
+MOB,Mobile,AL,USA
+MOT,Minot,ND,USA
+MQT,Marquette,MI,USA
+MRY,Monterey,CA,USA
+MSN,Madison,WI,USA
+MSO,Missoula,MT,USA
+MSP,Minneapolis,MN,USA
+MSY,New Orleans,LA,USA
+MTJ,Montrose,CO,USA
+MVY,Marthas Vineyard,MA,USA
+MYR,Myrtle Beach,SC,USA
+OAJ,Jacksonville,NC,USA
+OAK,Oakland,CA,USA
+OGG,Kahului,HI,USA
+OKC,Oklahoma City,OK,USA
+OMA,Omaha,NE,USA
+OME,Nome,AK,USA
+ONT,Ontario,CA,USA
+ORD,Chicago,IL,USA
+ORF,Norfolk,VA,USA
+ORH,Worcester,MA,USA
+OTH,North Bend,OR,USA
+OTZ,Kotzebue,AK,USA
+PAH,Paducah,KY,USA
+PBG,Plattsburgh,NY,USA
+PBI,West Palm Beach,FL,USA
+PDX,Portland,OR,USA
+PHF,Newport News,VA,USA
+PHL,Philadelphia,PA,USA
+PHX,Phoenix,AZ,USA
+PIA,Peoria,IL,USA
+PIB,Hattiesburg-Laurel,MS,USA
+PIH,Pocatello,ID,USA
+PIT,Pittsburgh,PA,USA
+PLN,Pellston,MI,USA
+PNS,Pensacola,FL,USA
+PPG,Pago Pago,AS,USA
+PSC,Pasco,WA,USA
+PSE,Ponce,PR,USA
+PSG,Petersburg,AK,USA
+PSP,Palm Springs,CA,USA
+PUB,Pueblo,CO,USA
+PVD,Providence,RI,USA
+PWM,Portland,ME,USA
+RAP,Rapid City,SD,USA
+RDD,Redding,CA,USA
+RDM,Redmond,OR,USA
+RDU,Raleigh,NC,USA
+RHI,Rhinelander,WI,USA
+RIC,Richmond,VA,USA
+RKS,Rock Springs,WY,USA
+RNO,Reno,NV,USA
+ROA,Roanoke,VA,USA
+ROC,Rochester,NY,USA
+ROW,Roswell,NM,USA
+RST,Rochester,MN,USA
+RSW,Ft. Myers,FL,USA
+SAF,Santa Fe,NM,USA
+SAN,San Diego,CA,USA
+SAT,San Antonio,TX,USA
+SAV,Savannah,GA,USA
+SBA,Santa Barbara,CA,USA
+SBN,South Bend,IN,USA
+SBP,San Luis Obispo,CA,USA
+SCC,Deadhorse,AK,USA
+SCE,State College,PA,USA
+SDF,Louisville,KY,USA
+SEA,Seattle,WA,USA
+SFO,San Francisco,CA,USA
+SGF,Springfield,MO,USA
+SGU,St George,UT,USA
+SHV,Shreveport,LA,USA
+SIT,Sitka,AK,USA
+SJC,San Jose,CA,USA
+SJT,San Angelo,TX,USA
+SJU,San Juan,PR,USA
+SLC,Salt Lake City,UT,USA
+SMF,Sacramento,CA,USA
+SMX,Santa Maria,CA,USA
+SNA,Santa Ana,CA,USA
+SPI,Springfield,IL,USA
+SPS,Wichita Falls,TX,USA
+SRQ,Sarasota,FL,USA
+STC,St Cloud,MN,USA
+STL,St Louis,MO,USA
+STT,Charlotte Amalie,VI,USA
+STX,Christiansted,VI,USA
+SUN,Hailey,ID,USA
+SUX,Sioux City,IA,USA
+SWF,Newburgh,NY,USA
+SYR,Syracuse,NY,USA
+TLH,Tallahassee,FL,USA
+TOL,Toledo,OH,USA
+TPA,Tampa,FL,USA
+TRI,Bristol,TN,USA
+TTN,Trenton,NJ,USA
+TUL,Tulsa,OK,USA
+TUS,Tucson,AZ,USA
+TVC,Traverse City,MI,USA
+TWF,Twin Falls,ID,USA
+TXK,Texarkana,AR,USA
+TYR,Tyler,TX,USA
+TYS,Knoxville,TN,USA
+UST,St. Augustine,FL,USA
+VEL,Vernal,UT,USA
+VLD,Valdosta,GA,USA
+VPS,Valparaiso,FL,USA
+WRG,Wrangell,AK,USA
+WYS,West Yellowstone,MT,USA
+XNA,Fayetteville/Springdale/Rogers,AR,USA
+YAK,Yakutat,AK,USA
+YUM,Yuma,AZ,USA
